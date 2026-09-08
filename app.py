@@ -38,26 +38,46 @@ def get_matches():
     headers = {
         "x-apisports-key": API_KEY
     }
-    # Gelecek 7 günün ve geçmiş 3 günün maçlarını al
-    from_date = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")
-    to_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
     
+    current_year = datetime.now().year
+    
+    # Tüm sezonu çek
     params = {
         "league": LEAGUE_ID,
-        "season": SEASON,
-        "from": from_date,
-        "to": to_date
+        "season": current_year
     }
     try:
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         data = response.json()
-        return data.get("response", [])
+        all_matches = data.get("response", [])
+        
+        # Eğer henüz o yılın sezonu API'de yoksa bir önceki yılı çek
+        if not all_matches:
+            params["season"] = current_year - 1
+            response = requests.get(url, headers=headers, params=params)
+            data = response.json()
+            all_matches = data.get("response", [])
+            
+        return all_matches
     except Exception as e:
         st.error(f"Maçlar çekilirken hata oluştu: {e}")
         return []
 
-matches = get_matches()
+all_matches = get_matches()
+
+# Ekranda sadece son 7 gün ve gelecek 14 günün maçlarını göster
+matches = []
+try:
+    from datetime import timezone
+    now = datetime.now(timezone.utc)
+    for m in all_matches:
+        match_date = datetime.strptime(m["fixture"]["date"], "%Y-%m-%dT%H:%M:%S%z")
+        days_diff = (match_date - now).days
+        if -7 <= days_diff <= 14:
+            matches.append(m)
+except Exception as e:
+    matches = all_matches[:20] # Hata olursa en azından ilk 20'yi göster
 
 # --- PUAN HESAPLAMA ---
 # Gerçek skorlar geldikçe tahminleri karşılaştır (Sadece 1-X-2 taraf baz alınır)
