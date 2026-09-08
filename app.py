@@ -7,7 +7,7 @@ st.set_page_config(page_title="Şampiyonlar Ligi Tahmin Yarışması", page_icon
 st.title("🏆 Şampiyonlar Ligi Tahmin Yarışması")
 
 # Kullanıcılar (İsimleri daha sonra kendi isimlerinizle değiştirebiliriz)
-USERS = ["Ahmet", "Mehmet", "Ayşe", "Fatma"]
+USERS = ["Buğra", "Hakan", "BFM", "Emre"]
 
 # Örnek Maç Verileri (Daha sonra gerçek API'den gelecek)
 MOCK_MATCHES = [
